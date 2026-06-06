@@ -5,23 +5,23 @@
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-1.4-F7931E?logo=scikit-learn&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
+**🚀 Live Deployment:** [https://tanmay-sentimentiq.streamlit.app/](https://tanmay-sentimentiq.streamlit.app/)
+
 ## Overview
 
 **SentimentIQ** is an end-to-end machine-learning web application that classifies
-movie reviews as *positive* or *negative*. It trains three different classifiers on
-the IMDB 50K dataset, automatically selects the best performer, and exposes a
-beautiful Streamlit dashboard for single-review analysis, batch CSV processing,
-and interactive model-insight exploration.
+movie reviews as *positive* or *negative*. It features a stunning "Playful Geometric" 
+design system, custom CSS styling, and robust NLP models trained on the IMDB 50K dataset.
 
 ## Features
 
 - 🔍 **Single Review Analysis** — type or paste any review and get an instant sentiment prediction with confidence score
 - 📊 **Batch CSV Analysis** — upload a CSV of reviews and get bulk predictions with downloadable results
-- 📈 **Model Insights Dashboard** — compare Logistic Regression, Naive Bayes, and Linear SVC side-by-side
-- 🧹 **Full NLP Pipeline** — HTML stripping, URL removal, stopword filtering, and Porter stemming
+- 📈 **Model Insights Dashboard** — compare Logistic Regression, Naive Bayes, Linear SVC, and a powerful **Voting Ensemble** side-by-side
+- 🧹 **Advanced NLP Pipeline** — HTML stripping, URL removal, smart negation handling, stopword filtering, and Porter stemming
 - 🎯 **Key Word Extraction** — see which words drove the model's decision
-- 🎨 **Professional UI** — styled cards, Plotly charts, confusion matrix heatmap, and responsive layout
-- ⚡ **One-Click Training** — train the model directly from the app if no saved model exists
+- 🎨 **Playful Geometric UI** — stunning Memphis Group-inspired aesthetics with vibrant colors, custom fonts (Outfit/Plus Jakarta Sans), and dynamic shapes
+- ⚡ **Cross-Validation** — robust 5-fold CV evaluation for the top-performing ensemble
 
 ## Tech Stack
 
@@ -39,11 +39,12 @@ and interactive model-insight exploration.
 
 *Results on the IMDB 50K test split (20 %, stratified)*
 
-| Model               | Accuracy | F1 Score |
-| -------------------- | -------- | -------- |
-| Logistic Regression  | ~89 %    | ~89 %    |
-| Multinomial Naive Bayes | ~87 % | ~87 %    |
-| Linear SVC           | ~89 %    | ~89 %    |
+| Model               | TF-IDF Config | Accuracy | F1 Score |
+| -------------------- | ------------- | -------- | -------- |
+| Logistic Regression  | 20k, unigram-trigram | ~89 %    | ~89 %    |
+| Multinomial Naive Bayes | 20k, unigram-trigram | ~87 % | ~87 %    |
+| Linear SVC (Calibrated) | 20k, unigram-trigram | ~90 %    | ~90 %    |
+| **Voting Ensemble** | **Soft Voting** | **~90 %** | **~90 %** |
 
 > Exact numbers depend on the dataset and preprocessing. Run `python train.py` to get your own results.
 

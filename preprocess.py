@@ -33,6 +33,8 @@ class TextPreprocessor:
     def __init__(self) -> None:
         download_nltk_resources()
         self._stop_words: set[str] = set(stopwords.words("english"))
+        for w in ["not", "no", "never", "nor", "none", "cannot", "couldn't", "didn't", "doesn't", "hadn't", "hasn't", "haven't", "isn't", "wasn't", "weren't", "wouldn't", "aren't"]:
+            self._stop_words.discard(w)
         self._stemmer = PorterStemmer()
         # Pre-compile frequently used patterns
         self._re_url = re.compile(r"https?://\S+|www\.\S+")
@@ -66,10 +68,25 @@ class TextPreprocessor:
         """Apply Porter stemming to every token."""
         return " ".join(self._stemmer.stem(word) for word in text.split())
 
+    def handle_negation(self, text: str) -> str:
+        words = text.split()
+        result = []
+        negation_flag = False
+        negation_words = {"not", "no", "never", "nor"}
+        for word in words:
+            if negation_flag:
+                word = word + "_NOT"
+                negation_flag = False
+            if word in negation_words or word.endswith("nt"):
+                negation_flag = True
+            result.append(word)
+        return " ".join(result)
+
     def full_pipeline(self, text: str) -> str:
-        """Run clean → stopwords → stem in order."""
+        """Run clean → stopwords → negation → stem in order."""
         text = self.clean_text(text)
         text = self.remove_stopwords(text)
+        text = self.handle_negation(text)
         text = self.stem_text(text)
         return text
 

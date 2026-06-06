@@ -39,6 +39,9 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 from sklearn.svm import LinearSVC
 from tabulate import tabulate
+from sklearn.ensemble import VotingClassifier
+from sklearn.model_selection import cross_val_score
+from sklearn.calibration import CalibratedClassifierCV
 
 from preprocess import TextPreprocessor
 
@@ -103,21 +106,32 @@ def main(data_path: str | None = None) -> None:
     # ------------------------------------------------------------------
     # 5. Define pipelines
     # ------------------------------------------------------------------
+    estimators = [
+        ("lr", LogisticRegression(max_iter=1_000, C=1.0, solver="lbfgs")),
+        ("nb", MultinomialNB(alpha=0.1)),
+        ("svc", CalibratedClassifierCV(LinearSVC(C=1.0, max_iter=2_000)))
+    ]
+
     pipelines: dict[str, Pipeline] = {
         "Logistic Regression": Pipeline([
             ("tfidf", TfidfVectorizer(
-                max_features=15_000, ngram_range=(1, 2), sublinear_tf=True)),
+                max_features=20_000, ngram_range=(1, 3), sublinear_tf=True)),
             ("clf", LogisticRegression(max_iter=1_000, C=1.0, solver="lbfgs")),
         ]),
         "Naive Bayes": Pipeline([
             ("tfidf", TfidfVectorizer(
-                max_features=15_000, ngram_range=(1, 2))),
+                max_features=20_000, ngram_range=(1, 3))),
             ("clf", MultinomialNB(alpha=0.1)),
         ]),
         "Linear SVC": Pipeline([
             ("tfidf", TfidfVectorizer(
-                max_features=15_000, ngram_range=(1, 2), sublinear_tf=True)),
+                max_features=20_000, ngram_range=(1, 3), sublinear_tf=True)),
             ("clf", LinearSVC(C=1.0, max_iter=2_000)),
+        ]),
+        "Voting Ensemble": Pipeline([
+            ("tfidf", TfidfVectorizer(
+                max_features=20_000, ngram_range=(1, 3), sublinear_tf=True)),
+            ("clf", VotingClassifier(estimators=estimators, voting="soft")),
         ]),
     }
 
@@ -147,6 +161,11 @@ def main(data_path: str | None = None) -> None:
             "confusion_matrix": cm,
             "classification_report": cr,
         }
+        
+        if name == "Voting Ensemble":
+            print(f"   Running Cross-Validation for Voting Ensemble...")
+            cv_scores = cross_val_score(pipe, df["cleaned_review"], df["label"], cv=5, scoring="accuracy")
+            print(f"   CV Accuracy: {cv_scores.mean():.4f} (±{cv_scores.std():.4f})")
 
         if f1 > best_f1:
             best_f1 = f1
@@ -186,7 +205,7 @@ def main(data_path: str | None = None) -> None:
     print("💾 Saved vectorizer.pkl")
 
     # Save each model individually
-    short = {"Logistic Regression": "lr", "Naive Bayes": "nb", "Linear SVC": "svc"}
+    short = {"Logistic Regression": "lr", "Naive Bayes": "nb", "Linear SVC": "svc", "Voting Ensemble": "ensemble"}
     for name, pipe in pipelines.items():
         fname = f"model_{short[name]}.pkl"
         joblib.dump(pipe, script_dir / fname)
